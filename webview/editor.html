@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>CSV Data Viewer and Editor</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .editable {
+      background-color: #f0f0f0;
+    }
+
+    .edit-input {
+      width: 95%;
+      /* Make input field wider */
+      padding: 5px;
+      /* Add padding for better appearance */
+      box-sizing: border-box;
+      /* Include padding and border in width */
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+</head>
+
+<body>
+
+  <h2>CSV Data Viewer and Editor</h2>
+
+  <input type="file" id="csvFileInput" accept=".csv">
+  <br><br>
+
+  <textarea id="manualInput" rows="5" cols="50" placeholder="Enter CSV data manually (comma-separated)"></textarea>
+  <button onclick="loadManualData()">Load Manual Data</button>
+  <br><br>
+
+  <button onclick="downloadCSV()">Download CSV</button>
+  <br><br>
+
+  <table id="dataTable">
+    <thead>
+      <tr></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+    let data = [];
+    let headers = [];
+
+    function loadManualData() {
+      const manualCsv = document.getElementById("manualInput").value;
+      if (manualCsv) {
+        processCSV(manualCsv);
+      }
+    }
+
+    document.getElementById("csvFileInput").addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          processCSV(e.target.result);
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    function processCSV(csv) {
+      const results = Papa.parse(csv, { header: true, skipEmptyLines: true });
+      if (results.errors.length > 0) {
+        console.error("CSV parsing errors:", results.errors);
+        vscode.postMessage({
+          command: "error",
+          data: `Error parsing CSV. ${results.errors[0].message}`,
+        });
+        return;
+      }
+
+      if (results.data.length > 0) {
+        data = results.data.map(row => Object.values(row));
+        headers = results.meta.fields;
+        renderTable();
+      }
+
+    }
+
+    function renderTable() {
+      const table = document.getElementById("dataTable");
+      table.innerHTML = "";
+
+      // Render headers
+      const headerRow = table.createTHead().insertRow();
+      headers.forEach(headerText => {
+        const headerCell = document.createElement("th");
+        headerCell.textContent = headerText;
+        headerRow.appendChild(headerCell);
+      });
+      const actionHeader = document.createElement("th");
+      actionHeader.textContent = "Actions";
+      headerRow.appendChild(actionHeader);
+
+      // Render data rows
+      const tbody = table.createTBody();
+      data.forEach((rowData, rowIndex) => {
+        const row = tbody.insertRow();
+        rowData.forEach((cellData, cellIndex) => {
+          const cell = row.insertCell();
+          cell.textContent = cellData;
+        });
+        const actionCell = row.insertCell();
+        const editButton = document.createElement("button");
+        editButton.textContent = "Edit";
+        editButton.onclick = () => editRow(rowIndex);
+        actionCell.appendChild(editButton);
+      });
+    }
+
+    function editRow(rowIndex) {
+      const row = document.getElementById("dataTable").rows[rowIndex + 1]; // +1 to account for header
+
+      for (let i = 0; i < headers.length; i++) {
+        const cell = row.cells[i];
+        const originalText = cell.textContent;
+        cell.innerHTML = `<input type="text" class="edit-input" value="${originalText}" data-original="${originalText}">`;
+      }
+
+      // Replace Edit button with Save
+      row.cells[headers.length].innerHTML = `<button onclick="saveRow(${rowIndex})">Save</button>`;
+    }
+
+    function saveRow(rowIndex) {
+      const row = document.getElementById("dataTable").rows[rowIndex + 1];
+
+      for (let i = 0; i < headers.length; i++) {
+        const cell = row.cells[i];
+        const inputElement = cell.querySelector("input");
+        const newValue = inputElement.value;
+        data[rowIndex][i] = newValue;
+        cell.textContent = newValue;
+      }
+
+      // Replace Save button with Edit
+      row.cells[headers.length].innerHTML = `<button onclick="editRow(${rowIndex})">Edit</button>`;
+    }
+
+    function downloadCSV() {
+      let csvContent = "";
+      csvContent += headers.join(",") + "\n";
+      data.forEach(row => {
+        csvContent += row.join(",") + "\n";
+      });
+      vscode.postMessage({
+        command: "download",
+        data: csvContent,
+        filename: `edited-${new Date().toISOString()}.csv`
+      });
+    }
+  </script>
+</body>
+
+</html>
