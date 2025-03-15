@@ -2,6 +2,8 @@
   "name": "csv-editor",
   "displayName": "CSV Editor",
   "description": "Show the CSV data into table and edit directly",
+  "publisher": "ndrcodes",
+  "icon": "csv-editor-logo.png",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.98.0"
@@ -40,5 +42,9 @@
   },
   "dependencies": {
     "@microsoft/vscode-file-downloader-api": "^1.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ndrcodes/csv-editor-ext"
   }
 }
