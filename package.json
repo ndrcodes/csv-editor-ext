@@ -4,7 +4,7 @@
   "description": "Show the CSV data into table and edit directly",
   "publisher": "ndrcodes",
   "icon": "csv-editor-logo.png",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "engines": {
     "vscode": "^1.98.0"
   },

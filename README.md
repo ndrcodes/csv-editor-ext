@@ -20,6 +20,12 @@ The command will trigger new tab in VSCode to open the HTML viewer.
 
 Users appreciate release notes as you update your extension.
 
+### 1.0.1
+
+Fix and add new features to the viewer & editor table:
+- [FIX] Handle single and double quotes in the CSV value
+- Add new feature to allow user Add Row after table rendered
+
 ### 1.0.0
 
 Initial release of CSV Editor. Adding these features as MVP.

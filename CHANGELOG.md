@@ -1,9 +1,14 @@
 # Change Log
 
-All notable changes to the "csv-editor" extension will be documented in this file.
+## v1.0.1
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+Fix and add new features to the viewer & editor table:
+- [FIX] Handle single and double quotes in the CSV value
+- Add new feature to allow user Add Row after table rendered
 
-## [Unreleased]
-
-- Initial release
+## v1.0.0
+Initial release of CSV Editor. Adding these features as MVP.
+- Read CSV from file to Table view
+- Input raw CSV test to Table view
+- Edit CSV row
+- Re-download the CSV file into local
