@@ -21,12 +21,23 @@
     }
 
     .edit-input {
-      width: 95%;
-      /* Make input field wider */
-      padding: 5px;
-      /* Add padding for better appearance */
+      width: 100%;
+      /* Make input field full width of cell */
+      padding: 8px;
+      /* Match cell padding */
       box-sizing: border-box;
       /* Include padding and border in width */
+      margin: 0;
+      /* Remove default margin */
+      border: none;
+      /* Remove default input border */
+      font-size: inherit;
+      /* Inherit font size from cell */
+      font-family: inherit;
+      /* Inherit font family from cell */
+      background-color: transparent;
+      /* Make input background transparent */
+      color: inherit;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -127,39 +138,53 @@
       });
     }
 
-    function editRow(rowIndex) {
-      const row = document.getElementById("dataTable").rows[rowIndex + 1]; // +1 to account for header
-
-      for (let i = 0; i < headers.length; i++) {
-        const cell = row.cells[i];
-        const originalText = cell.textContent;
-        cell.innerHTML = `<input type="text" class="edit-input" value="${originalText}" data-original="${originalText}">`;
-      }
-
-      // Replace Edit button with Save
-      row.cells[headers.length].innerHTML = `<button onclick="saveRow(${rowIndex})">Save</button>`;
-    }
-
     function saveRow(rowIndex) {
       const row = document.getElementById("dataTable").rows[rowIndex + 1];
 
       for (let i = 0; i < headers.length; i++) {
         const cell = row.cells[i];
         const inputElement = cell.querySelector("input");
-        const newValue = inputElement.value;
+        let newValue = inputElement.value;
+
+        // Properly escape double quotes in the value
+        newValue = newValue.replace(/'/g, '"');
+        newValue = newValue.replace(/"/g, '""');
+
         data[rowIndex][i] = newValue;
         cell.textContent = newValue;
       }
 
-      // Replace Save button with Edit
       row.cells[headers.length].innerHTML = `<button onclick="editRow(${rowIndex})">Edit</button>`;
+    }
+
+    function editRow(rowIndex) {
+      const row = document.getElementById("dataTable").rows[rowIndex + 1];
+
+      for (let i = 0; i < headers.length; i++) {
+        const cell = row.cells[i];
+        let originalText = data[rowIndex][i];
+
+        // Unescape double quotes for display in the input field
+        originalText = originalText.replace(/""/g, '"');
+
+        if (originalText.includes("'")) {
+          cell.innerHTML = `<input type="text" class="edit-input" value="${originalText}" data-original="${originalText}">`;
+        } else {
+          cell.innerHTML = `<input type="text" class="edit-input" value='${originalText}' data-original="${originalText}">`;
+        }
+      }
+
+      row.cells[headers.length].innerHTML = `<button onclick="saveRow(${rowIndex})">Save</button>`;
     }
 
     function downloadCSV() {
       let csvContent = "";
       csvContent += headers.join(",") + "\n";
       data.forEach(row => {
-        csvContent += row.join(",") + "\n";
+        const escapedRow = row.map(cell => {
+          return cell.replace(/""/g, "'");
+        });
+        csvContent += escapedRow.join(",") + "\n";
       });
       vscode.postMessage({
         command: "download",
