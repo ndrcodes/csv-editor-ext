@@ -39,6 +39,11 @@
       /* Make input background transparent */
       color: inherit;
     }
+
+    #addRowButton {
+      display: none;
+      /* Initially hide the button */
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
@@ -64,6 +69,8 @@
     </thead>
     <tbody></tbody>
   </table>
+
+  <button id='addRowButton' onclick="addRow()">Add Row</button>
 
   <script>
     const vscode = acquireVsCodeApi();
@@ -103,8 +110,11 @@
         data = results.data.map(row => Object.values(row));
         headers = results.meta.fields;
         renderTable();
+        document.getElementById("addRowButton").style.display = 'block'; // Show the button
+      } else {
+        document.getElementById("addRowButton").style.display = 'none'; //hide the button
+        renderTable();
       }
-
     }
 
     function renderTable() {
@@ -191,6 +201,12 @@
         data: csvContent,
         filename: `edited-${new Date().toISOString()}.csv`
       });
+    }
+
+    function addRow() {
+      const newRow = Array(headers.length).fill(""); // Create a new row with empty cells
+      data.push(newRow);
+      renderTable();
     }
   </script>
 </body>
