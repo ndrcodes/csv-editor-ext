@@ -12,10 +12,11 @@ export function activate(context: vscode.ExtensionContext) {
 			panel = vscode.window.createWebviewPanel(
 				'csvEditor',
 				'CSV Editor',
-				vscode.ViewColumn.One,
+				vscode.ViewColumn.Beside,
 				{
 					enableScripts: true,
 					localResourceRoots: [context.extensionUri],
+					retainContextWhenHidden: true
 				}
 			);
 

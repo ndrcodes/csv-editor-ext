@@ -20,6 +20,12 @@ The command will trigger new tab in VSCode to open the HTML viewer.
 
 Users appreciate release notes as you update your extension.
 
+### 1.0.2
+
+Fix the viewer & editor table:
+- [FIX] Remain session when move tab
+- [FIX] Adjust VSCode version to at least v1.91.0 
+
 ### 1.0.1
 
 Fix and add new features to the viewer & editor table:

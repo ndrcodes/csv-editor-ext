@@ -44,9 +44,10 @@ function activate(context) {
     let panel;
     let disposable = vscode.commands.registerCommand('csv-editor.showCSV', () => {
         if (!panel) {
-            panel = vscode.window.createWebviewPanel('csvEditor', 'CSV Editor', vscode.ViewColumn.One, {
+            panel = vscode.window.createWebviewPanel('csvEditor', 'CSV Editor', vscode.ViewColumn.Beside, {
                 enableScripts: true,
                 localResourceRoots: [context.extensionUri],
+                retainContextWhenHidden: true
             });
             panel.webview.html = getWebviewContent(context.extensionUri);
             panel.webview.onDidReceiveMessage(message => {
